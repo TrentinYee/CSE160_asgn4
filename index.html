@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>HYPERMURDER: DigitalShred</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+
+  <body onload="main()">
+    <div class="container">
+    <canvas id="webgl" width="400" height="400">
+    Please use a browser that supports "canvas"
+    </canvas>
+    
+
+    <div class="text">
+    <script src="lib\cuon-utils.js"></script> <!--could be bad according to video somehow, not sure-->
+    <script src="lib\webgl-debug.js"></script>
+    <script src="lib\webgl-utils.js"></script>
+    <script src="lib\cuon-matrix-cse160.js"></script>
+    <script src="src\Point.js"></script>
+    <script src="src\Triangle.js"></script>
+    <script src="src\Cube.js"></script>
+    <script src="src\camera.js"></script>
+    <script src="src\TriangularPrism.js"></script>
+    <script src="src\asgn4.js"></script>
+
+    <p id="numdot"> XXX </p>
+    <button type="button" id="Normal On">Normals On</button>
+    <button type="button" id="Normal Off">Normals Off</button>
+    <br>
+
+    Controls: <br>
+    W - Forward <br>
+    A - Left <br>
+    S - Back <br>
+    D - Right <br>
+    <br>
+    Q - Pan Left <br>
+    E - Pan Right <br>
+    <br>
+    M1 - Place Block <br>
+    M2 - Destroy Block <br>
+    <br>
+    F - Punch <br>
+    <br>
+    Objective: Destroy Malevolent Head
+
+    <audio id="parry" src="./resources/parry-ultrakill.mp3"></audio>
+
+  </body>
+</html>
