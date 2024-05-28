@@ -645,10 +645,14 @@ var g_map=[
 
 // draws map using that massive g_map array up there, number equates to height
 function drawMap(mapsize) {
+  var texnum = 0;
+  if (g_normalOn) {
+    texnum = -3;
+  }
   for (x=0;x<mapsize;x++) {
     for (y=0;y<mapsize;y++){
         for (z=0;z<g_map[x][y];z++) { // generate one cube per height
-          drawCube([x-mapsize/2, -1.75+z, y-mapsize/2], [1, 1, 1], [0, 1, 0, 0], [1,1,1], 0);
+          drawCube([x-mapsize/2, -1.75+z, y-mapsize/2], [1, 1, 1], [0, 1, 0, 0], [1,1,1], texnum);
         }
     }
   }
