@@ -30,6 +30,7 @@ var FSHADER_SOURCE = `
   uniform vec3 u_lightPos;
   uniform vec3 u_cameraPos;
   uniform bool u_lightOn;
+  uniform bool u_spotOn;
   varying vec4 v_VertPos;
   void main() {
 
@@ -51,7 +52,7 @@ var FSHADER_SOURCE = `
 
     } else if (u_whichTexture == 1) {
 
-      gl_FragColor = texture2D(u_Sampler1, v_UV);
+      gl_FragColor = texture2D(u_Sampler1, v_UV); // use face texture
 
     } else {
       gl_FragColor = vec4(1,0.2,0.2,1); // Otherwise just use some reddish color
@@ -86,15 +87,46 @@ var FSHADER_SOURCE = `
     // Specular
     float specular = pow(max(dot(E,R), 0.0), 20.0);
 
+    // diffuse and ambient set up
     vec3 diffuse = vec3(gl_FragColor) * nDotL *0.7;
     vec3 ambient = vec3(gl_FragColor) * 0.2;
 
+    // Spot light effect
+    float spotEffect = 0.0;
+    vec3 spotDir = normalize(vec3(0.0, -1.0, 0.0));
+    float spotCosAngle = dot(-L, spotDir);
+    if (spotCosAngle > cos(45.0)) { //10.0 is the cutoff angle
+      spotEffect = pow(spotCosAngle, 20.0);
+    }
+
     if (u_lightOn) {
-      if (u_whichTexture == -2) {
-        gl_FragColor = vec4(specular+diffuse+ambient, 1.0);
-      } else {
-        gl_FragColor = vec4(diffuse+ambient, 1.0);
+
+      if (u_spotOn) { //spotlight mode
+
+        if (u_whichTexture == -2 || u_whichTexture == 1) {
+
+          gl_FragColor = vec4((specular+diffuse)*spotEffect + ambient, 1.0);
+
+        } else {
+
+          gl_FragColor = vec4(diffuse*spotEffect + ambient, 1.0);
+
+        }
+
+      } else { // pointlight mode
+
+        if (u_whichTexture == -2 || u_whichTexture == 1) {
+
+          gl_FragColor = vec4((specular+diffuse) + ambient, 1.0);
+
+        } else {
+
+          gl_FragColor = vec4(diffuse + ambient, 1.0);
+
+        }
+
       }
+      
     }
     
   }`;
@@ -118,6 +150,7 @@ let u_Sampler1;
 let u_lightPos;
 let u_cameraPos;
 let u_lightOn;
+let u_spotOn;
 
 // Global UI element related variables
 let g_selectedColor = [1.0, 1.0, 1.0, 1.0];
@@ -127,8 +160,9 @@ let g_globalScale = 1;
 let g_lightPos = [-5, 2.5, -2];
 let g_normalOn = false;
 let g_orbitOn = true;
-let g_parry;
 let g_lightOn = true;
+let g_spotOn = false;
+let g_parry;
 
 // all the UI interaction
 function addActionsForHtmlUI() {
@@ -150,6 +184,10 @@ function addActionsForHtmlUI() {
   // Light Toggle Buttons ------------
   document.getElementById('Light On').onclick = function() { g_lightOn = true};
   document.getElementById('Light Off').onclick = function() { g_lightOn = false};
+
+  // Light Toggle Buttons ------------
+  document.getElementById('SpotLight').onclick = function() { g_spotOn = true};
+  document.getElementById('PointLight').onclick = function() { g_spotOn = false};
 
   // audio ---------------
   g_parry = document.getElementById('parry');
@@ -262,6 +300,13 @@ function connectVariablesToGLSL() {
   u_lightOn = gl.getUniformLocation(gl.program, 'u_lightOn');
   if (!u_lightOn) {
     console.log('Failed to get the storage location of u_lightOn');
+    return false;
+  }
+
+  // Get the storage location of u_spotOn
+  u_spotOn = gl.getUniformLocation(gl.program, 'u_spotOn');
+  if (!u_spotOn) {
+    console.log('Failed to get the storage location of u_spotOn');
     return false;
   }
 
@@ -697,6 +742,9 @@ function renderAllShapes() {
 
   // pass the light status to GLSL
   gl.uniform1i(u_lightOn, g_lightOn);
+
+  // pass the light mode to GLSL
+  gl.uniform1i(u_spotOn, g_spotOn);
   
   //console.log('Uniform Location:', u_cameraPos);
   //console.log('Camera Position:', g_cam.eye.elements[0], g_cam.eye.elements[1], g_cam.eye.elements[2]);
@@ -705,7 +753,7 @@ function renderAllShapes() {
   var light = new Cube();
     light.color = [2,2,0,1.0];
     light.matrix.translate(g_lightPos[0], g_lightPos[1]+6, g_lightPos[2]);
-    light.matrix.scale(0.1,0.1,0.1);
+    light.matrix.scale(-0.1,-0.1,-0.1);
     light.matrix.translate(-0.5, -0.5, -0.5);
     light.renderfast();
 
