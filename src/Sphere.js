@@ -1,6 +1,6 @@
-class Cube{
+class Sphere{
     constructor(){
-      this.type='cube';
+      this.type='sphere';
       this.color = [1.0, 1.0, 1.0, 1.0];
       this.matrix = new Matrix4();
       this.textureNum=-2;
@@ -24,37 +24,42 @@ class Cube{
       // Pass the matrix to u_ModelMatrix attribute
       gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
 
-      drawTriangle3DUVNormal(
-        [0,0,0, 1,1,0, 1,0,0],
-        [0,0, 1,1, 1,0],
-        [0, 0, -1, 0, 0, -1, 0, 0, -1,]
-      )
-      
-      drawTriangle3DUVNormal( [0,0,0, 0,1,0, 1,1,0,], [0,0, 0,1, 1,1], [0, 0, -1, 0, 0, -1, 0, 0, -1,]);
+      var d = Math.PI/10; 
+      var dd = Math.PI/10; 
 
-      // back side
-      drawTriangle3DUVNormal( [0.0,0.0,1.0, 1.0,1.0,1.0, 1.0,0.0,1.0,], [0,0, 1,1, 1,0], [0, 0, 1, 0, 0, 1, 0, 0, 1,]);
-      drawTriangle3DUVNormal( [0.0,0.0,1.0, 0.0,1.0,1.0, 1.0,1.0,1.0,], [0,0, 0,1, 1,1], [0, 0, 1, 0, 0, 1, 0, 0, 1,]);
-      
-      // top side
-      drawTriangle3DUVNormal( [0.0,1.0,0.0, 1.0,1.0,0.0, 1.0,1.0,1.0,], [0,0, 1,0, 1,1], [0, 1, 0, 0, 1, 0, 0, 1, 0,]);
-      drawTriangle3DUVNormal( [0.0,1.0,0.0, 1.0,1.0,1.0, 0.0,1.0,1.0,], [0,0, 1,1, 0,1], [0, 1, 0, 0, 1, 0, 0, 1, 0,]);
+      for (var t=0; t<Math.PI; t+=d) { //theta loop, 1 - 180
+        for (var r=0; r < (2*Math.PI); r+=d) {  // RO loop, 1-360
 
-      // bottom side
-      drawTriangle3DUVNormal( [0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,0.0,1.0,], [0,0, 1,0, 1,1], [0, -1, 0, 0, -1, 0, 0, -1, 0,]);
-      drawTriangle3DUVNormal( [0.0,0.0,0.0, 1.0,0.0,1.0, 0.0,0.0,1.0,], [0,0, 1,1, 0,1], [0, -1, 0, 0, -1, 0, 0, -1, 0,]);
+          // drawing a small square with the sphere equation
+            var p1 = [Math.sin(t)*Math.cos(r), Math.sin(t)*Math.sin(r), Math.cos(t)]
+            var p2 = [Math.sin(t+dd)*Math.cos(r), Math.sin(t+dd)*Math.sin(r), Math.cos(t+dd)]
+            var p3 = [Math.sin(t)*Math.cos(r+dd), Math.sin(t)*Math.sin(r+dd), Math.cos(t)]
+            var p4 = [Math.sin(t+dd)*Math.cos(r+dd), Math.sin(t+dd)*Math.sin(r+dd), Math.cos(t+dd)]
 
-      // left side
-      drawTriangle3DUVNormal( [0.0,0.0,0.0, 0.0,1.0,1.0, 0.0,0.0,1.0,], [0,0, 1,1, 1,0], [-1, 0, 0, -1, 0, 0, -1, 0, 0,]);
-      drawTriangle3DUVNormal( [0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,], [0,0, 0,1, 1,1], [-1, 0, 0, -1, 0, 0, -1, 0, 0,]);
+          // first triangle
+          var v = [];
+          var uv = [];
+          v=v.concat(p1); uv=uv.concat([0,0])
+          v=v.concat(p2); uv=uv.concat([0,0])
+          v=v.concat(p4); uv=uv.concat([0,0])
 
-      // right side
-      drawTriangle3DUVNormal( [1.0,0.0,0.0, 1.0,1.0,1.0, 1.0,0.0,1.0,], [0,0, 1,1, 1,0], [1, 0, 0, 1, 0, 0, 1, 0, 0,]);
-      drawTriangle3DUVNormal( [1.0,0.0,0.0, 1.0,1.0,0.0, 1.0,1.0,1.0,], [0,0, 0,1, 1,1], [1, 0, 0, 1, 0, 0, 1, 0, 0,]);
+          gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
+          drawTriangle3DUVNormal(v,uv,v);
 
+          // second triangle
+          v = [];
+          uv = [];
+          v=v.concat(p1); uv=uv.concat([0,0])
+          v=v.concat(p4); uv=uv.concat([0,0])
+          v=v.concat(p3); uv=uv.concat([0,0])
+
+          gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
+          drawTriangle3DUVNormal(v,uv,v);
+        }
     }
+  }
 
-    renderfast() {
+    /*renderfast() {
       var rgba = this.color;
       var allverts = [];
       var alluvs = [];
@@ -117,7 +122,7 @@ class Cube{
       allnorms = allnorms.concat ([1, 0, 0, 1, 0, 0, 1, 0, 0,]);
 
       drawTriangle3DUVNormal(allverts, alluvs, allnorms);
-    }
+    }*/
   }
 
   function drawCube(pos, scale, rot, color, textureno) {
